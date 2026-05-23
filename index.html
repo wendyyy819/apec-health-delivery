@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>亚太健康快递 | APEC China 2026</title>
+<style>
+  :root { --scale: 0.7; }
+  body {
+    margin: 0;
+    font-family: 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0a2540, #1e4d8b);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    overflow-x: hidden;
+  }
+  h1 { margin: 10px 0 4px; font-size: 26px; }
+  .subtitle {
+    color: #a5d8ff;
+    margin-bottom: 8px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.7;
+  }
+  .hud { display: flex; gap: 20px; font-size: 16px; margin-bottom: 8px; }
+  .hud span { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 8px; }
+
+  /* ── Map scaling ── */
+  .map-container {
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .map {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    background: #1a3a5c;
+    transform: scale(var(--scale));
+    transform-origin: top left;
+    overflow: hidden;
+  }
+  .map::before {
+    content: '🌏';
+    position: absolute;
+    font-size: 600px;
+    opacity: 0.05;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ── City nodes ── */
+  .city {
+    position: absolute;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: default;
+    transition: transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
+  }
+  .city-emoji { font-size: 34px; line-height: 1; pointer-events: none; }
+  .city-name {
+    font-size: 10px; font-weight: bold; color: #000;
+    margin-top: 2px; white-space: nowrap; pointer-events: none;
+  }
+  .city.sick {
+    background: #ef4444;
+    cursor: pointer;
+    animation: pulse 0.7s infinite;
+  }
+  .city.sick .city-name { color: #fff; }
+  .city:hover { transform: scale(1.12); }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px #ef4444, 0 0 0 4px rgba(255,255,255,0.5); }
+    50%       { box-shadow: 0 0 55px #ef4444, 0 0 0 10px rgba(255,255,255,0.9); }
+  }
+
+  /* ── Score popup ── */
+  .popup {
+    position: absolute;
+    color: #ffd700; font-weight: bold;
+    pointer-events: none;
+    animation: rise 0.8s forwards;
+    font-size: 32px;
+  }
+  @keyframes rise { to { transform: translateY(-70px); opacity: 0; } }
+
+  /* ── Info bar ── */
+  .info {
+    background: rgba(255,255,255,0.05);
+    padding: 7px 18px; border-radius: 8px;
+    margin-top: 8px; max-width: 860px;
+    text-align: center; font-size: 13px; line-height: 1.6;
+  }
+
+  /* ── Overlay screens ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10;
+  }
+  .overlay h1 { font-size: 38px; margin-bottom: 8px; }
+  .overlay p { margin: 5px 0; opacity: 0.85; }
+
+  /* ── Difficulty buttons ── */
+  .diff-buttons { display: flex; gap: 20px; margin-top: 24px; }
+  .diff-btn {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 22px 30px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.07);
+    color: #fff; cursor: pointer;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    min-width: 130px;
+  }
+  .diff-btn:hover {
+    transform: scale(1.07);
+    background: rgba(255,255,255,0.17);
+    border-color: rgba(255,255,255,0.5);
+  }
+  .diff-btn.easy:hover   { border-color: #4ade80; }
+  .diff-btn.normal:hover { border-color: #facc15; }
+  .diff-btn.hard:hover   { border-color: #ef4444; }
+  .diff-icon  { font-size: 36px; margin-bottom: 8px; }
+  .diff-label { font-size: 20px; font-weight: bold; margin-bottom: 6px; }
+  .diff-desc  { font-size: 12px; opacity: 0.65; }
+
+  /* ── Action button (end screen) ── */
+  .action-btn {
+    padding: 12px 28px; font-size: 16px;
+    border: none; border-radius: 8px;
+    background: #4ade80; color: #000;
+    font-weight: bold; cursor: pointer; margin-top: 20px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .action-btn:hover { background: #22c55e; transform: scale(1.05); }
+
+  /* ── Persistent restart button ── */
+  #restartBtn {
+    position: fixed; top: 12px; right: 16px;
+    padding: 7px 14px; font-size: 13px;
+    background: rgba(255,255,255,0.12);
+    color: #fff; border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; cursor: pointer; z-index: 20;
+    transition: background 0.15s, transform 0.1s;
+    display: none;
+  }
+  #restartBtn:hover { background: rgba(255,255,255,0.27); transform: scale(1.05); }
+</style>
+</head>
+<body>
+
+<button id="restartBtn" onclick="location.reload()">🔄 重新开始</button>
+
+<h1>🚑 亚太健康快递</h1>
+<div class="subtitle">
+  守护亚太21个成员经济体的健康<br>
+  <span style="font-size:11px;opacity:0.6;">Building an Asia-Pacific Community to Prosper Together · APEC China 2026</span>
+</div>
+<div class="hud">
+  <span>⏱ 时间: <b id="time">30</b>s</span>
+  <span>💰 分数: <b id="score">0</b></span>
+  <span>❤️ 生命: <b id="life">5</b></span>
+</div>
+
+<div class="map-container" id="mapContainer">
+  <div class="map" id="map"></div>
+</div>
+
+<div class="info">
+  📍 红色城市需要紧急医疗物资，点击它们送达！超时未送达会扣血，生命归零游戏结束。
+</div>
+
+<!-- 难度选择 / 开始界面 -->
+<div class="overlay" id="startScreen">
+  <h1>🌏 亚太健康快递</h1>
+  <p>你是APEC地区的紧急医疗调度员</p>
+  <p style="font-size:13px;opacity:0.6;">守护21个成员经济体的健康，哪里需要救援就立刻点击！</p>
+  <div class="diff-buttons">
+    <div class="diff-btn easy" onclick="startGame('easy')">
+      <span class="diff-icon">😊</span>
+      <span class="diff-label">简单</span>
+      <span class="diff-desc">生命 7 · 间隔 2s</span>
+    </div>
+    <div class="diff-btn normal" onclick="startGame('normal')">
+      <span class="diff-icon">😐</span>
+      <span class="diff-label">普通</span>
+      <span class="diff-desc">生命 5 · 间隔 1.5s</span>
+    </div>
+    <div class="diff-btn hard" onclick="startGame('hard')">
+      <span class="diff-icon">😰</span>
+      <span class="diff-label">困难</span>
+      <span class="diff-desc">生命 3 · 间隔 1s</span>
+    </div>
+  </div>
+</div>
+
+<!-- 结束界面 -->
+<div class="overlay" id="endScreen" style="display:none;">
+  <h1 id="endTitle">任务完成！</h1>
+  <p style="font-size:22px;">最终得分: <b id="finalScore">0</b></p>
+  <p id="rank" style="font-size:18px;"></p>
+  <button class="action-btn" onclick="location.reload()">再玩一次</button>
+</div>
+
+<script>
+  // 21个APEC成员经济体（使用文化符号emoji，不使用国旗）
+  // 坐标系：1280×720，任意两城市圆心距 ≥ 90px，距边缘 ≥ 40px
+  const cities = [
+    // 澳大利亚 成员经济体
+    { name:'堪培拉',       emoji:'🦘',  x:1010, y:488 },
+    // 文莱 成员经济体
+    { name:'斯里巴加湾市', emoji:'🕌',  x:895,  y:303 },
+    // 加拿大 成员经济体
+    { name:'渥太华',       emoji:'🍁',  x:55,   y:95  },
+    // 智利 成员经济体
+    { name:'圣地亚哥',     emoji:'🍇',  x:73,   y:475 },
+    // 中国 成员经济体
+    { name:'北京',         emoji:'🏯',  x:752,  y:87  },
+    // 中国香港 成员经济体
+    { name:'香港',         emoji:'🏙️',  x:817,  y:173 },
+    // 印度尼西亚 成员经济体
+    { name:'雅加达',       emoji:'🌋',  x:775,  y:500 },
+    // 日本 成员经济体
+    { name:'东京',         emoji:'🗼',  x:953,  y:87  },
+    // 韩国 成员经济体
+    { name:'首尔',         emoji:'⛩️',  x:853,  y:83  },
+    // 马来西亚 成员经济体
+    { name:'吉隆坡',       emoji:'🌴',  x:763,  y:333 },
+    // 墨西哥 成员经济体
+    { name:'墨西哥城',     emoji:'🌵',  x:40,   y:290 },
+    // 新西兰 成员经济体
+    { name:'惠灵顿',       emoji:'🥝',  x:1103, y:503 },
+    // 巴布亚新几内亚 成员经济体
+    { name:'莫尔斯比港',   emoji:'🌺',  x:985,  y:400 },
+    // 秘鲁 成员经济体
+    { name:'利马',         emoji:'🦙',  x:57,   y:383 },
+    // 菲律宾 成员经济体
+    { name:'马尼拉',       emoji:'🏝️',  x:965,  y:245 },
+    // 俄罗斯 成员经济体
+    { name:'莫斯科',       emoji:'❄️',  x:345,  y:45  },
+    // 新加坡 成员经济体
+    { name:'新加坡',       emoji:'🦁',  x:810,  y:410 },
+    // 中国台北 成员经济体
+    { name:'台北',         emoji:'🏔️',  x:910,  y:168 },
+    // 泰国 成员经济体
+    { name:'曼谷',         emoji:'🐘',  x:675,  y:300 },
+    // 美国 成员经济体
+    { name:'华盛顿',       emoji:'🗽',  x:43,   y:195 },
+    // 越南 成员经济体
+    { name:'河内',         emoji:'🍜',  x:742,  y:225 },
+  ];
+
+  const DIFF = {
+    easy:   { life: 7, interval: 2000 },
+    normal: { life: 5, interval: 1500 },
+    hard:   { life: 3, interval: 1000 },
+  };
+
+  let score = 0, life = 5, time = 30, sickInterval = 1500, gameOver = false;
+  let cityEls = [], sickTimers = {}, gameTimer = null;
+
+  // 自适应缩放：保持内部坐标系1280×720，按窗口大小缩放显示
+  function applyScale() {
+    const w = window.innerWidth - 32;
+    const h = window.innerHeight - 220;
+    const scale = Math.min(w / 1280, h / 720, 1.0);
+    document.documentElement.style.setProperty('--scale', scale);
+    const c = document.getElementById('mapContainer');
+    c.style.width  = Math.round(1280 * scale) + 'px';
+    c.style.height = Math.round(720  * scale) + 'px';
+  }
+  applyScale();
+  window.addEventListener('resize', applyScale);
+
+  function startGame(diff) {
+    life = DIFF[diff].life;
+    sickInterval = DIFF[diff].interval;
+    document.getElementById('life').textContent = life;
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('restartBtn').style.display = 'block';
+
+    const map = document.getElementById('map');
+    cities.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'city';
+      el.style.left = c.x + 'px';
+      el.style.top  = c.y + 'px';
+      el.innerHTML  = `<span class="city-emoji">${c.emoji}</span><span class="city-name">${c.name}</span>`;
+      el.onclick = () => cure(i);
+      map.appendChild(el);
+      cityEls.push(el);
+    });
+
+    gameTimer = setInterval(() => {
+      if (gameOver) return;
+      time--;
+      document.getElementById('time').textContent = time;
+      if (time % 5 === 0 && sickInterval > 500) sickInterval -= 100;
+      if (time <= 0) endGame();
+    }, 1000);
+
+    function trySick() {
+      if (gameOver) return;
+      const healthy = cityEls
+        .map((el, i) => el.classList.contains('sick') ? null : i)
+        .filter(i => i !== null);
+      if (healthy.length > 0) {
+        const i = healthy[Math.floor(Math.random() * healthy.length)];
+        cityEls[i].classList.add('sick');
+        sickTimers[i] = setTimeout(() => {
+          if (cityEls[i].classList.contains('sick')) {
+            cityEls[i].classList.remove('sick');
+            loseLife();
+          }
+        }, 4000);
+      }
+      setTimeout(trySick, sickInterval);
+    }
+    trySick();
+  }
+
+  function cure(i) {
+    if (!cityEls[i].classList.contains('sick')) return;
+    cityEls[i].classList.remove('sick');
+    clearTimeout(sickTimers[i]);
+    score += 10;
+    document.getElementById('score').textContent = score;
+    showPopup(cityEls[i], '+10');
+  }
+
+  function loseLife() {
+    if (gameOver) return;
+    life--;
+    document.getElementById('life').textContent = life;
+    if (life <= 0) endGame();
+  }
+
+  function showPopup(el, text) {
+    const p = document.createElement('div');
+    p.className = 'popup';
+    p.textContent = text;
+    p.style.left = el.style.left;
+    p.style.top  = el.style.top;
+    document.getElementById('map').appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+
+  function endGame() {
+    if (gameOver) return;
+    gameOver = true;
+    clearInterval(gameTimer);
+    Object.values(sickTimers).forEach(t => clearTimeout(t));
+    sickTimers = {};
+    document.getElementById('endScreen').style.display = 'flex';
+    document.getElementById('finalScore').textContent = score;
+    let rank = '😅 还需努力';
+    if      (score >= 200) rank = '🏆 卓越调度官';
+    else if (score >= 120) rank = '🥇 优秀调度员';
+    else if (score >= 60)  rank = '👍 合格员工';
+    document.getElementById('rank').textContent = rank;
+  }
+</script>
+</body>
+</html>

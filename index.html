@@ -302,7 +302,7 @@
       el.style.left = c.x + 'px';
       el.style.top  = c.y + 'px';
       el.innerHTML  = `<span class="city-emoji">${c.emoji}</span><span class="city-name">${c.name}</span>`;
-      el.onclick = () => cure(i);
+      el.onclick = () => handleCityClick(i);
       map.appendChild(el);
       cityEls.push(el);
     });
@@ -335,6 +335,14 @@
     trySick();
   }
 
+  function handleCityClick(i) {
+    if (cityEls[i].classList.contains('sick')) {
+      cure(i);
+    } else {
+      penalizeWrongCity(i);
+    }
+  }
+
   function cure(i) {
     if (!cityEls[i].classList.contains('sick')) return;
     cityEls[i].classList.remove('sick');
@@ -342,6 +350,13 @@
     score += 10;
     document.getElementById('score').textContent = score;
     showPopup(cityEls[i], '+10');
+  }
+
+  function penalizeWrongCity(i) {
+    if (gameOver) return;
+    score = Math.max(0, score - 2);
+    document.getElementById('score').textContent = score;
+    showPopup(cityEls[i], '分数 -2');
   }
 
   function loseLife() {

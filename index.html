@@ -2,6 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>亚太健康快递 | APEC China 2026</title>
 <style>
   :root { --scale: 0.7; }
@@ -210,6 +211,7 @@
 <!-- 结束界面 -->
 <div class="overlay" id="endScreen" style="display:none;">
   <h1 id="endTitle">任务完成！</h1>
+  <p id="endDesc">30秒救援任务已结束。</p>
   <p style="font-size:22px;">最终得分: <b id="finalScore">0</b></p>
   <p id="rank" style="font-size:18px;"></p>
   <button class="action-btn" onclick="location.reload()">再玩一次</button>
@@ -274,9 +276,10 @@
 
   // 自适应缩放：保持内部坐标系1280×720，按窗口大小缩放显示
   function applyScale() {
-    const w = window.innerWidth - 32;
-    const h = window.innerHeight - 220;
-    const scale = Math.min(w / 1280, h / 720, 1.0);
+    const w = Math.max(window.innerWidth - 32, 320);
+    const h = Math.max(window.innerHeight - 220, 240);
+    const rawScale = Math.min(w / 1280, h / 720);
+    const scale = Math.max(0.35, Math.min(rawScale, 1.0));
     document.documentElement.style.setProperty('--scale', scale);
     const c = document.getElementById('mapContainer');
     c.style.width  = Math.round(1280 * scale) + 'px';
@@ -309,7 +312,7 @@
       time--;
       document.getElementById('time').textContent = time;
       if (time % 5 === 0 && sickInterval > 500) sickInterval -= 100;
-      if (time <= 0) endGame();
+      if (time <= 0) endGame('timeup');
     }, 1000);
 
     function trySick() {
@@ -345,7 +348,7 @@
     if (gameOver) return;
     life--;
     document.getElementById('life').textContent = life;
-    if (life <= 0) endGame();
+    if (life <= 0) endGame('failed');
   }
 
   function showPopup(el, text) {
@@ -358,12 +361,17 @@
     setTimeout(() => p.remove(), 800);
   }
 
-  function endGame() {
+  function endGame(reason) {
     if (gameOver) return;
     gameOver = true;
     clearInterval(gameTimer);
     Object.values(sickTimers).forEach(t => clearTimeout(t));
     sickTimers = {};
+    const completed = reason === 'timeup';
+    document.getElementById('endTitle').textContent = completed ? '任务完成！' : '任务失败！';
+    document.getElementById('endDesc').textContent = completed
+      ? '30秒救援任务已结束，感谢你守护亚太健康。'
+      : '生命值已经归零，医疗物资没有及时送达。';
     document.getElementById('endScreen').style.display = 'flex';
     document.getElementById('finalScore').textContent = score;
     let rank = '😅 还需努力';

@@ -64,32 +64,59 @@
   /* ── City nodes ── */
   .city {
     position: absolute;
-    width: 90px; height: 90px;
+    width: 82px; height: 82px;
     border-radius: 50%;
-    background: #4ade80;
+    background: radial-gradient(circle at 35% 28%, #bbf7d0 0%, #4ade80 52%, #16a34a 100%);
     cursor: default;
-    transition: transform 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
+    border: 2px solid rgba(255,255,255,0.75);
+    box-shadow:
+      0 0 0 4px rgba(74,222,128,0.28),
+      0 10px 22px rgba(0,0,0,0.35),
+      inset 0 2px 8px rgba(255,255,255,0.35);
   }
-  .city-emoji { font-size: 34px; line-height: 1; pointer-events: none; }
+  .city-emoji {
+    font-size: 31px; line-height: 1; pointer-events: none;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+  }
   .city-name {
-    font-size: 10px; font-weight: bold; color: #000;
+    font-size: 9px; font-weight: bold; color: #000;
+    line-height: 1.1;
     margin-top: 2px; white-space: nowrap; pointer-events: none;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.45);
   }
   .city.sick {
-    background: #ef4444;
+    background: radial-gradient(circle at 35% 28%, #fecaca 0%, #ef4444 48%, #991b1b 100%);
     cursor: pointer;
     animation: pulse 0.7s infinite;
+    border-color: rgba(255,255,255,0.95);
   }
   .city.sick .city-name { color: #fff; }
-  .city:hover { transform: scale(1.12); }
+  .city:hover {
+    transform: scale(1.12);
+    filter: brightness(1.06);
+    box-shadow:
+      0 0 0 5px rgba(255,255,255,0.45),
+      0 12px 28px rgba(0,0,0,0.42),
+      inset 0 2px 8px rgba(255,255,255,0.4);
+  }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 20px #ef4444, 0 0 0 4px rgba(255,255,255,0.5); }
-    50%       { box-shadow: 0 0 55px #ef4444, 0 0 0 10px rgba(255,255,255,0.9); }
+    0%, 100% {
+      box-shadow:
+        0 0 20px rgba(239,68,68,0.95),
+        0 0 0 4px rgba(255,255,255,0.5),
+        0 10px 24px rgba(0,0,0,0.38);
+    }
+    50% {
+      box-shadow:
+        0 0 52px rgba(239,68,68,1),
+        0 0 0 10px rgba(255,255,255,0.82),
+        0 12px 30px rgba(0,0,0,0.45);
+    }
   }
 
   /* ── Score popup ── */
@@ -231,23 +258,23 @@
     // 澳大利亚 成员经济体
     { name:'堪培拉',       emoji:'🦘',  x:1010, y:488 },
     // 文莱 成员经济体
-    { name:'斯里巴加湾市', emoji:'🕌',  x:895,  y:303 },
+    { name:'斯里巴加湾市', emoji:'🕌',  x:900,  y:320 },
     // 加拿大 成员经济体
     { name:'渥太华',       emoji:'🍁',  x:55,   y:95  },
     // 智利 成员经济体
     { name:'圣地亚哥',     emoji:'🍇',  x:73,   y:475 },
     // 中国 成员经济体
-    { name:'北京',         emoji:'🏯',  x:752,  y:87  },
+    { name:'北京',         emoji:'🏯',  x:735,  y:75  },
     // 中国香港 成员经济体
-    { name:'香港',         emoji:'🏙️',  x:817,  y:173 },
+    { name:'中国香港',     emoji:'🏙️',  x:805,  y:185 },
     // 印度尼西亚 成员经济体
-    { name:'雅加达',       emoji:'🌋',  x:775,  y:500 },
+    { name:'雅加达',       emoji:'🌋',  x:770,  y:515 },
     // 日本 成员经济体
-    { name:'东京',         emoji:'🗼',  x:953,  y:87  },
+    { name:'东京',         emoji:'🗼',  x:970,  y:85  },
     // 韩国 成员经济体
-    { name:'首尔',         emoji:'⛩️',  x:853,  y:83  },
+    { name:'首尔',         emoji:'⛩️',  x:835,  y:75  },
     // 马来西亚 成员经济体
-    { name:'吉隆坡',       emoji:'🌴',  x:763,  y:333 },
+    { name:'吉隆坡',       emoji:'🌴',  x:760,  y:355 },
     // 墨西哥 成员经济体
     { name:'墨西哥城',     emoji:'🌵',  x:40,   y:290 },
     // 新西兰 成员经济体
@@ -257,19 +284,19 @@
     // 秘鲁 成员经济体
     { name:'利马',         emoji:'🦙',  x:57,   y:383 },
     // 菲律宾 成员经济体
-    { name:'马尼拉',       emoji:'🏝️',  x:965,  y:245 },
+    { name:'马尼拉',       emoji:'🏝️',  x:975,  y:255 },
     // 俄罗斯 成员经济体
     { name:'莫斯科',       emoji:'❄️',  x:345,  y:45  },
     // 新加坡 成员经济体
-    { name:'新加坡',       emoji:'🦁',  x:810,  y:410 },
+    { name:'新加坡',       emoji:'🦁',  x:835,  y:430 },
     // 中国台北 成员经济体
-    { name:'台北',         emoji:'🏔️',  x:910,  y:168 },
+    { name:'中国台湾',     emoji:'🏔️',  x:915,  y:165 },
     // 泰国 成员经济体
-    { name:'曼谷',         emoji:'🐘',  x:675,  y:300 },
+    { name:'曼谷',         emoji:'🐘',  x:655,  y:312 },
     // 美国 成员经济体
     { name:'华盛顿',       emoji:'🗽',  x:43,   y:195 },
     // 越南 成员经济体
-    { name:'河内',         emoji:'🍜',  x:742,  y:225 },
+    { name:'河内',         emoji:'🍜',  x:724,  y:235 },
   ];
 
   const DIFF = {

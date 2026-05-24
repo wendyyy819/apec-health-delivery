@@ -326,6 +326,7 @@
   };
 
   let score = 0, life = 5, time = 30, sickInterval = 1500, gameOver = false;
+  let wrongClickStreak = 0;
   let cityEls = [], sickTimers = {}, gameTimer = null;
 
   // 自适应缩放：保持内部坐标系1280×720，按窗口大小缩放显示
@@ -345,6 +346,7 @@
   function startGame(diff) {
     life = DIFF[diff].life;
     sickInterval = DIFF[diff].interval;
+    wrongClickStreak = 0;
     document.getElementById('life').textContent = life;
     document.getElementById('startScreen').style.display = 'none';
     document.getElementById('restartBtn').style.display = 'block';
@@ -401,6 +403,7 @@
     if (!cityEls[i].classList.contains('sick')) return;
     cityEls[i].classList.remove('sick');
     clearTimeout(sickTimers[i]);
+    wrongClickStreak = 0;
     score += 10;
     document.getElementById('score').textContent = score;
     showPopup(cityEls[i], '+10');
@@ -408,9 +411,11 @@
 
   function penalizeWrongCity(i) {
     if (gameOver) return;
-    score = Math.max(0, score - 2);
+    wrongClickStreak++;
+    const penalty = Math.min(wrongClickStreak + 1, 5);
+    score = Math.max(0, score - penalty);
     document.getElementById('score').textContent = score;
-    showPopup(cityEls[i], '分数 -2');
+    showPopup(cityEls[i], `分数 -${penalty}`);
   }
 
   function loseLife(i) {

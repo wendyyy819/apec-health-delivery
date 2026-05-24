@@ -66,57 +66,33 @@
     position: absolute;
     width: 82px; height: 82px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 28%, #bbf7d0 0%, #4ade80 52%, #16a34a 100%);
+    background: #4ade80;
     cursor: default;
-    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    transition: transform 0.15s;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px solid rgba(255,255,255,0.75);
-    box-shadow:
-      0 0 0 4px rgba(74,222,128,0.28),
-      0 10px 22px rgba(0,0,0,0.35),
-      inset 0 2px 8px rgba(255,255,255,0.35);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
   }
   .city-emoji {
     font-size: 31px; line-height: 1; pointer-events: none;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
   }
   .city-name {
     font-size: 9px; font-weight: bold; color: #000;
     line-height: 1.1;
     margin-top: 2px; white-space: nowrap; pointer-events: none;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.45);
   }
   .city.sick {
-    background: radial-gradient(circle at 35% 28%, #fecaca 0%, #ef4444 48%, #991b1b 100%);
+    background: #ef4444;
     cursor: pointer;
     animation: pulse 0.7s infinite;
-    border-color: rgba(255,255,255,0.95);
   }
   .city.sick .city-name { color: #fff; }
-  .city:hover {
-    transform: scale(1.12);
-    filter: brightness(1.06);
-    box-shadow:
-      0 0 0 5px rgba(255,255,255,0.45),
-      0 12px 28px rgba(0,0,0,0.42),
-      inset 0 2px 8px rgba(255,255,255,0.4);
-  }
+  .city:hover { transform: scale(1.12); }
   @keyframes pulse {
-    0%, 100% {
-      box-shadow:
-        0 0 20px rgba(239,68,68,0.95),
-        0 0 0 4px rgba(255,255,255,0.5),
-        0 10px 24px rgba(0,0,0,0.38);
-    }
-    50% {
-      box-shadow:
-        0 0 52px rgba(239,68,68,1),
-        0 0 0 10px rgba(255,255,255,0.82),
-        0 12px 30px rgba(0,0,0,0.45);
-    }
+    0%, 100% { box-shadow: 0 0 20px #ef4444, 0 0 0 4px rgba(255,255,255,0.5); }
+    50%       { box-shadow: 0 0 55px #ef4444, 0 0 0 10px rgba(255,255,255,0.9); }
   }
 
   /* ── Score popup ── */
